@@ -60,6 +60,7 @@ public class GoogleMobileAdsPlugin implements FlutterPlugin, ActivityAware, Meth
   @Nullable private AdInstanceManager instanceManager;
   @Nullable private ActivityPluginBinding activityBinding;
   private final Map<String, NativeAdFactory> nativeAdFactories = new HashMap<>();
+  private boolean hasNotifiedAboutInitializationCompletion = false;
 
   /**
    * Public constructor for the plugin. Dependency initialization is handled in lifecycle methods
@@ -231,6 +232,11 @@ public class GoogleMobileAdsPlugin implements FlutterPlugin, ActivityAware, Meth
             new OnInitializationCompleteListener() {
               @Override
               public void onInitializationComplete(InitializationStatus initializationStatus) {
+                // Notify only once per app start to avoid result.success crashes:
+                if (hasNotifiedAboutInitializationCompletion) {
+                  return;
+                }
+                hasNotifiedAboutInitializationCompletion = true;
                 result.success(new FlutterInitializationStatus(initializationStatus));
               }
             });
